@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jesselton Commission Test Scenarios</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.2em; margin-bottom: 8px; }
+        .header p { opacity: 0.85; font-size: 1.05em; }
+        .content { padding: 30px; }
+
+        /* Summary */
+
+        /* Group header */
+        .group-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 10px;
+            margin: 30px 0 18px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Note section (reference table under group header) */
+        .group-note {
+            background: #f0f0f5;
+            border-radius: 12px;
+            padding: 18px 24px;
+            margin-bottom: 22px;
+            font-size: 0.95em;
+            line-height: 1.55;
+            color: #333;
+        }
+        .group-note p { margin-bottom: 10px; }
+        .group-note strong { color: #222; }
+        .group-note table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.92em;
+        }
+        .group-note th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .group-note th:first-child { text-align: left; }
+        .group-note td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+        .group-note td:first-child { text-align: left; font-weight: 500; }
+        .group-note tr:last-child td { font-weight: bold; border-top: 2px solid #764ba2; }
+
+        /* Scenario card */
+        .test-scenario {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 3px solid transparent;
+        }
+        .test-scenario.passed { border-color: #38ef7d; }
+        .test-scenario.failed { border-color: #ff6a00; }
+
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            gap: 15px;
+        }
+        .scenario-title-block {}
+        .scenario-title { font-size: 1.4em; color: #333; font-weight: bold; }
+        .scenario-desc { color: #666; font-size: 0.9em; margin-top: 4px; }
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .status-badge.passed { background: #38ef7d; color: white; }
+        .status-badge.failed { background: #ff6a00; color: white; }
+
+        /* Layout */
+        .side-by-side { display: flex; gap: 20px; align-items: flex-start; }
+        .chain-column { flex: 0 0 220px; }
+        .calc-column { flex: 1; min-width: 0; }
+
+        /* Chain */
+        .chain {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .chain-node {
+            border-radius: 10px;
+            padding: 10px 14px;
+            text-align: center;
+            color: white;
+            width: 190px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .chain-node.sapphire { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .chain-node.ruby { background: linear-gradient(135deg, #f5576c, #f093fb); }
+        .chain-node.bd { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .chain-node.bd_unlocked { background: linear-gradient(135deg, #f7971e, #ffd200); color: #333; }
+        .chain-node.inactive { background: linear-gradient(135deg, #adb5bd, #6c757d); }
+        .chain-node.company-node { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .chain-node.seller-ring { outline: 3px solid #333; outline-offset: 2px; }
+        .chain-arrow { color: #bbb; font-size: 1.4em; line-height: 1.2; text-align: center; }
+        .node-name { font-weight: bold; font-size: 0.95em; }
+        .node-rank { font-size: 0.8em; opacity: 0.9; }
+        .node-rate { font-size: 1.05em; font-weight: bold; margin-top: 2px; }
+        .node-seller-label {
+            display: inline-block;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 0.72em;
+            margin-top: 2px;
+        }
+        .node-inactive-label {
+            display: inline-block;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 0.72em;
+            margin-top: 2px;
+            color: white;
+        }
+        .chain-more { color: #999; font-size: 0.85em; text-align: center; padding: 5px; }
+
+        /* Multi-seller side-by-side chains */
+        .chain-multi {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .chain-multi .chain-seller-col { flex: 1; }
+        .chain-multi .chain-seller-label {
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #667eea;
+            margin-bottom: 6px;
+            padding: 4px 8px;
+            background: #f0f4ff;
+            border-radius: 6px;
+        }
+        .chain-multi .chain-node {
+            width: 100%;
+            min-width: unset;
+            padding: 8px 10px;
+        }
+        .chain-multi .chain-node .node-name { font-size: 0.85em; }
+        .chain-multi .chain-node .node-rank { font-size: 0.75em; }
+        .chain-multi .chain-node .node-rate { font-size: 0.95em; }
+
+        /* Calc table */
+        .calc-section { background: white; border-radius: 10px; padding: 20px; }
+        .calc-section h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+            font-size: 1.05em;
+        }
+        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .calc-table th {
+            background: #667eea;
+            color: white;
+            padding: 9px 10px;
+            text-align: left;
+        }
+        .calc-table th:last-child, .calc-table td:last-child { text-align: center; width: 50px; }
+        .calc-table th:nth-child(2), .calc-table td:nth-child(2) { text-align: right; }
+        .calc-table td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; }
+        .calc-table tr:last-child td { border-bottom: none; }
+        .calc-table tr.total-row td { background: #f0f4ff; font-weight: bold; border-top: 2px solid #667eea; }
+        .calc-table tr.company-row td { background: #fff3e0; font-weight: bold; }
+        .calc-table tr.subtotal-row td { background: #f8f9fa; font-style: italic; }
+        .calc-table tr.absorbed-row td { color: #adb5bd; }
+        .calc-table tr.skipped-row td { color: #ccc; text-decoration: line-through; }
+        .match { color: #28a745; font-weight: bold; }
+        .mismatch { color: #dc3545; font-weight: bold; }
+        .dim { color: #adb5bd; }
+
+        /* Key test */
+        .key-test {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 15px;
+            margin-top: 15px;
+            font-size: 0.88em;
+            color: #856404;
+        }
+
+        /* Project commission special */
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .project-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .project-panel h4 { color: #667eea; margin-bottom: 10px; font-size: 0.95em; border-bottom: 1px solid #e0e0e0; padding-bottom: 6px; }
+
+        @media (max-width: 900px) {
+            .side-by-side { flex-direction: column; }
+            .chain-column { flex: none; width: 100%; }
+            .chain-node { width: 100%; }
+
+            .project-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Jesselton Property — Commission Test Scenarios</h1>
+        <p>20 scenarios · Groups A–E · Covers all override, ISP, termination &amp; project commission branches</p>
+    </div>
+    <div class="content">
+        <div id="scenarios"></div>
+    </div>
+</div>
+
+<script>
+// =====================================================================
+//  COMMISSION ENGINE
+// =====================================================================
+
+const ISP_TABLE = {
+    100: [0.0030, 0.0028, 0.0025, 0.0023, 0.0021, 0.0019, 0.0017, 0.0015, 0.0012, 0.0010],
+    200: [0.0050, 0.0048, 0.0044, 0.0039, 0.0033, 0.0027, 0.0021, 0.0015, 0.0013, 0.0010],
+    300: [0.0070, 0.0065, 0.0060, 0.0050, 0.0040, 0.0035, 0.0030, 0.0020, 0.0015, 0.0015],
+    400: [0.0100, 0.0090, 0.0080, 0.0065, 0.0050, 0.0035, 0.0025, 0.0020, 0.0020, 0.0015]
+};
+
+function getSubsidyRate(renCount) {
+    if (renCount >= 400) return 0.00;
+    if (renCount >= 300) return 0.01;
+    if (renCount >= 200) return 0.02;
+    if (renCount >= 100) return 0.03;
+    return 0;
+}
+
+function getISPRates(renCount) {
+    if (renCount >= 400) return ISP_TABLE[400];
+    if (renCount >= 300) return ISP_TABLE[300];
+    if (renCount >= 200) return ISP_TABLE[200];
+    if (renCount >= 100) return ISP_TABLE[100];
+    return null; // < 100 REN: ISP not active
+}
+
+class Agent {
+    constructor(id, name, rank, parentId = null, active = true) {
+        this.id = id;
+        this.name = name;
+        this.rank = rank; // 'SAPPHIRE' | 'RUBY' | 'BD' | 'BD_UNLOCKED'
+        this.parentId = parentId;
+        this.active = active;
+    }
+    getBaseRate() {
+        switch (this.rank) {
+            case 'SAPPHIRE': return 0.70;
+            case 'RUBY':     return 0.80;
+            case 'BD':       return 0.87;
+            case 'BD_UNLOCKED': return 0.87;
+            default: return 0;
+        }
+    }
+}
+
+function buildUplineChain(agents, sellerId) {
+    const seller = agents.find(a => a.id === sellerId);
+    const chain = [];
+    let cur = seller.parentId;
+    while (cur) {
+        const p = agents.find(a => a.id === cur);
+        if (!p) break;
+        chain.push(p);
+        cur = p.parentId;
+    }
+    return chain;
+}
+
+/**
+ * Calculate Jesselton commission for a regular (non-project) transaction.
+ * forcedSubsidyRate: if set, overrides the company-size subsidy lookup.
+ *   Used for Group A scenarios that test override logic in isolation.
+ */
+function calculateCommission(agents, sellerId, grossCommission, renCount, forcedSubsidyRate) {
+    const subsidyRate = (forcedSubsidyRate != null) ? forcedSubsidyRate : getSubsidyRate(renCount);
+    const ispRates = getISPRates(renCount);
+
+    const seller = agents.find(a => a.id === sellerId);
+    const uplineChain = buildUplineChain(agents, sellerId);
+
+    // Personal
+    let sellerEffRate = seller.getBaseRate();
+    if (seller.rank === 'BD_UNLOCKED') sellerEffRate = 0.87 + subsidyRate;
+    const personalCommission = sellerEffRate * grossCommission;
+
+    // Overrides — walk upline chain, track highest rank rate seen
+    let prevHighRate = sellerEffRate;
+    const overrides = [];
+
+    for (const upline of uplineChain) {
+        if (!upline.active) {
+            overrides.push({ upline, amount: 0, bdAmount: 0, subsidyAmount: 0, skipped: true });
+            continue;
+        }
+        if (upline.rank === 'BD_UNLOCKED') {
+            const effRate = 0.87 + subsidyRate;
+            if (effRate > prevHighRate) {
+                const bdPortion = Math.max(0, 0.87 - prevHighRate);
+                const bdAmt  = bdPortion * grossCommission;
+                const subAmt = subsidyRate * grossCommission;
+                overrides.push({ upline, amount: bdAmt + subAmt, bdAmount: bdAmt, subsidyAmount: subAmt, skipped: false });
+                prevHighRate = effRate;
+            } else {
+                overrides.push({ upline, amount: 0, bdAmount: 0, subsidyAmount: 0, skipped: false });
+            }
+        } else {
+            const upRate = upline.getBaseRate();
+            if (upRate > prevHighRate) {
+                const amt = (upRate - prevHighRate) * grossCommission;
+                overrides.push({ upline, amount: amt, bdAmount: amt, subsidyAmount: 0, skipped: false });
+                prevHighRate = upRate;
+            } else {
+                overrides.push({ upline, amount: 0, bdAmount: 0, subsidyAmount: 0, skipped: false });
+            }
+        }
+    }
+
+    // ISP — inactive uplines re-indexed out; active uplines fill Gen1..GenN
+    const activeUplines = uplineChain.filter(u => u.active);
+    const ispPayments = [];
+    if (ispRates) {
+        for (let i = 0; i < 10; i++) {
+            const rate = ispRates[i];
+            const amt  = rate * grossCommission;
+            if (i < activeUplines.length) {
+                ispPayments.push({ upline: activeUplines[i], gen: i + 1, rate, amount: amt, absorbed: false });
+            } else {
+                ispPayments.push({ upline: null, gen: i + 1, rate, amount: amt, absorbed: true });
+            }
+        }
+    }
+
+    const totalOverrides = overrides.reduce((s, o) => s + o.amount, 0);
+    const totalISPPaid   = ispPayments.filter(p => !p.absorbed).reduce((s, p) => s + p.amount, 0);
+    const companyAmount  = grossCommission - personalCommission - totalOverrides - totalISPPaid;
+
+    return {
+        seller, grossCommission, renCount, subsidyRate,
+        sellerEffRate, personalCommission,
+        overrides, ispPayments,
+        totalOverrides, totalISPPaid, companyAmount
+    };
+}
+
+// =====================================================================
+//  HELPERS
+// =====================================================================
+function rm(v) {
+    return 'RM\u202f' + v.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function pct(r) { return (r * 100).toFixed(2).replace(/\.?0+$/, '') + '%'; }
+function near(a, b) { return Math.abs(a - b) < 0.015; }
+function tick(ok) { return ok ? '<span class="match">✓</span>' : '<span class="mismatch">✗</span>'; }
+
+// =====================================================================
+//  SCENARIO DEFINITIONS
+// =====================================================================
+const SCENARIO_GROUPS = [
+
+// ─────────────────────────────────────────────────────────────────────
+// GROUP A: Basic Override, No ISP
+// forcedSubsidyRate = 0.03 for scenarios with BD_UNLOCKED so they work
+// at renCount=50 (no ISP). Isolates override logic.
+// ─────────────────────────────────────────────────────────────────────
+{
+    id: 'A',
+    title: 'Group A: Basic Override — No ISP (< 100 REN)',
+    scenarios: [
+    {
+        id: 'S1', name: 'S1: Sapphire Isolated Sale',
+        desc: 'Sapphire seller, no uplines, 50 REN',
+        keyTest: 'Baseline: 70% personal, zero overrides, zero ISP, company = 30%',
+        commission: 10000, renCount: 50, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const s = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', null, true);
+            return { agents: [s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: {}, ispPaid: 0, company: 3000 }
+    },
+    {
+        id: 'S2', name: 'S2: Sapphire → Ruby (Direct Upline)',
+        desc: 'Sapphire sells, Ruby is Gen1 upline, 50 REN',
+        keyTest: 'Gap override: Ruby receives (80−70)% = 10% = RM1,000',
+        commission: 10000, renCount: 50, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const ruby = new Agent('ruby', 'Ruby Upline', 'RUBY', null, true);
+            const s    = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'ruby', true);
+            return { agents: [ruby, s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: { ruby: 1000 }, ispPaid: 0, company: 2000 }
+    },
+    {
+        id: 'S3', name: 'S3: Sapphire → BD (Direct Upline)',
+        desc: 'Sapphire sells, BD is Gen1 upline, 50 REN',
+        keyTest: 'BD receives full gap (87−70)% = 17% = RM1,700',
+        commission: 10000, renCount: 50, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const bd = new Agent('bd', 'BD Upline', 'BD', null, true);
+            const s  = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'bd', true);
+            return { agents: [bd, s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: { bd: 1700 }, ispPaid: 0, company: 1300 }
+    },
+    {
+        id: 'S4', name: 'S4: Sapphire → Sapphire → BD (Skip Same Rank)',
+        desc: 'Gen1 upline is also Sapphire (same rank = skipped), Gen2 = BD, 50 REN',
+        keyTest: 'Same-rank upline receives RM0 override; BD still gets full 17% gap',
+        commission: 10000, renCount: 50, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const bd   = new Agent('bd', 'BD Upline', 'BD', null, true);
+            const sap2 = new Agent('sap2', 'Sapphire Mid', 'SAPPHIRE', 'bd', true);
+            const s    = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'sap2', true);
+            return { agents: [bd, sap2, s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: { sap2: 0, bd: 1700 }, ispPaid: 0, company: 1300 }
+    },
+    {
+        id: 'S5', name: 'S5: Sapphire → BD → BD Unlocked (3% Subsidy)',
+        desc: 'Full 3-rank chain; BD Unlocked only receives subsidy (BD already took gap)',
+        keyTest: 'BD Unlocked receives only 3% subsidy = RM300; BD portion already claimed by BD',
+        commission: 10000, renCount: 50, forcedSubsidyRate: 0.03,
+        buildAgents: () => {
+            const bdu = new Agent('bdu', 'BD Unlocked', 'BD_UNLOCKED', null, true);
+            const bd  = new Agent('bd', 'BD Agent', 'BD', 'bdu', true);
+            const s   = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'bd', true);
+            return { agents: [bdu, bd, s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: { bd: 1700, bdu: 300 }, ispPaid: 0, company: 1000 }
+    },
+    {
+        id: 'S6', name: 'S6: Ruby → BD Unlocked (BD Portion + Subsidy)',
+        desc: 'Ruby seller, direct upline is BD Unlocked — BD portion + subsidy tracked separately',
+        keyTest: 'BD Unlocked gets RM700 BD portion + RM300 subsidy = RM1,000 total',
+        commission: 10000, renCount: 50, forcedSubsidyRate: 0.03,
+        buildAgents: () => {
+            const bdu = new Agent('bdu', 'BD Unlocked', 'BD_UNLOCKED', null, true);
+            const s   = new Agent('seller', 'Ruby Agent', 'RUBY', 'bdu', true);
+            return { agents: [bdu, s], sellerId: 'seller' };
+        },
+        expected: {
+            personal: 8000,
+            overrides: { bdu: { bd: 700, subsidy: 300, total: 1000 } },
+            ispPaid: 0, company: 1000
+        }
+    },
+    {
+        id: 'S7', name: 'S7: BD → BD Unlocked (Subsidy Only)',
+        desc: 'BD sells, direct upline is BD Unlocked — only subsidy flows up',
+        keyTest: 'BD Unlocked receives 3% subsidy only = RM300; no BD portion (seller already at 87%)',
+        commission: 10000, renCount: 50, forcedSubsidyRate: 0.03,
+        buildAgents: () => {
+            const bdu = new Agent('bdu', 'BD Unlocked', 'BD_UNLOCKED', null, true);
+            const s   = new Agent('seller', 'BD Agent', 'BD', 'bdu', true);
+            return { agents: [bdu, s], sellerId: 'seller' };
+        },
+        expected: {
+            personal: 8700,
+            overrides: { bdu: { bd: 0, subsidy: 300, total: 300 } },
+            ispPaid: 0, company: 1000
+        }
+    },
+    {
+        id: 'S8', name: 'S8: BD Unlocked Sells (Lower-Rank Upline)',
+        desc: 'BD Unlocked (90%) sells; upline is Sapphire — no override flows up to lower rank',
+        keyTest: 'No override flows upward to lower-rank upline; company keeps the rest',
+        commission: 10000, renCount: 50, forcedSubsidyRate: 0.03,
+        buildAgents: () => {
+            const sap = new Agent('sap', 'Sapphire Upline', 'SAPPHIRE', null, true);
+            const s   = new Agent('seller', 'BD Unlocked', 'BD_UNLOCKED', 'sap', true);
+            return { agents: [sap, s], sellerId: 'seller' };
+        },
+        expected: { personal: 9000, overrides: { sap: 0 }, ispPaid: 0, company: 1000 }
+    },
+    {
+        id: 'S9', name: 'S9: Full Cascade — Sapphire → Ruby → BD → BD Unlocked',
+        desc: 'All 4 ranks in chain; each layer receives exactly its gap/subsidy slice',
+        keyTest: 'Ruby 10% + BD 7% + BD Unlocked 3% subsidy = 20% total overrides',
+        commission: 10000, renCount: 50, forcedSubsidyRate: 0.03,
+        buildAgents: () => {
+            const bdu  = new Agent('bdu', 'BD Unlocked', 'BD_UNLOCKED', null, true);
+            const bd   = new Agent('bd', 'BD Agent', 'BD', 'bdu', true);
+            const ruby = new Agent('ruby', 'Ruby Agent', 'RUBY', 'bd', true);
+            const s    = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'ruby', true);
+            return { agents: [bdu, bd, ruby, s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: { ruby: 1000, bd: 700, bdu: 300 }, ispPaid: 0, company: 1000 }
+    }
+    ]
+},
+
+// ─────────────────────────────────────────────────────────────────────
+// GROUP B: ISP Distribution Only (Sapphire seller, same-rank uplines)
+// ─────────────────────────────────────────────────────────────────────
+{
+    id: 'B',
+    title: 'Group B: ISP Distribution Only (Sapphire seller, same-rank uplines)',
+    note: `
+        <p>The ISP is paid up to <strong>10 generations</strong> of uplines.</p>
+        <p><strong>Important Rule:</strong> If a sales line does not have 10 layers of uplines, the remaining/unclaimed percentages for the missing generations will be <strong>absorbed by the company</strong>.</p>
+        <table>
+            <tr><th>Generation</th><th>2.00% Pool<br>(100 REN)</th><th>3.00% Pool<br>(200 REN)</th><th>4.00% Pool<br>(300 REN)</th><th>5.00% Pool<br>(400 REN)</th></tr>
+            <tr><td>Gen 1 (Direct)</td><td>0.30%</td><td>0.50%</td><td>0.70%</td><td>1.00%</td></tr>
+            <tr><td>Gen 2</td><td>0.28%</td><td>0.48%</td><td>0.65%</td><td>0.90%</td></tr>
+            <tr><td>Gen 3</td><td>0.25%</td><td>0.44%</td><td>0.60%</td><td>0.80%</td></tr>
+            <tr><td>Gen 4</td><td>0.23%</td><td>0.39%</td><td>0.50%</td><td>0.65%</td></tr>
+            <tr><td>Gen 5</td><td>0.21%</td><td>0.33%</td><td>0.40%</td><td>0.50%</td></tr>
+            <tr><td>Gen 6</td><td>0.19%</td><td>0.27%</td><td>0.35%</td><td>0.35%</td></tr>
+            <tr><td>Gen 7</td><td>0.17%</td><td>0.21%</td><td>0.30%</td><td>0.25%</td></tr>
+            <tr><td>Gen 8</td><td>0.15%</td><td>0.15%</td><td>0.20%</td><td>0.20%</td></tr>
+            <tr><td>Gen 9</td><td>0.12%</td><td>0.13%</td><td>0.15%</td><td>0.20%</td></tr>
+            <tr><td>Gen 10</td><td>0.10%</td><td>0.10%</td><td>0.15%</td><td>0.15%</td></tr>
+            <tr><td>TOTAL ISP</td><td>2.00%</td><td>3.00%</td><td>4.00%</td><td>5.00%</td></tr>
+        </table>
+    `,
+    scenarios: [
+    {
+        id: 'S10', name: 'S10: 100 REN — Partial ISP (1 Upline)',
+        desc: 'Sapphire sells, only 1 Sapphire upline; Gen2–10 absorbed by company',
+        keyTest: 'Company absorbs RM170 unclaimed ISP (Gen2–10 have no real uplines)',
+        commission: 10000, renCount: 100, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const up = new Agent('up1', 'Sapphire Upline 1', 'SAPPHIRE', null, true);
+            const s  = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'up1', true);
+            return { agents: [up, s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: { up1: 0 }, ispPaid: 30, ispDetail: [{ id: 'up1', gen: 1, amount: 30 }], company: 2970 }
+    },
+    {
+        id: 'S11', name: 'S11: 100 REN — Full 10-Gen ISP Chain',
+        desc: '10 Sapphire uplines; full 2% ISP pool distributed across all generations',
+        keyTest: 'All 10 generations receive exact ISP share; total ISP = RM200',
+        commission: 10000, renCount: 100, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const agents = [];
+            for (let i = 10; i >= 1; i--) {
+                const parentId = i < 10 ? `up${i+1}` : null;
+                agents.push(new Agent(`up${i}`, `Sapphire Gen${i}`, 'SAPPHIRE', parentId, true));
+            }
+            agents.push(new Agent('seller', 'Sapphire Seller', 'SAPPHIRE', 'up1', true));
+            return { agents, sellerId: 'seller' };
+        },
+        expected: {
+            personal: 7000,
+            overrides: {},
+            ispPaid: 200,
+            ispDetail: [
+                { id: 'up1', gen: 1, amount: 30 }, { id: 'up2', gen: 2, amount: 28 },
+                { id: 'up3', gen: 3, amount: 25 }, { id: 'up4', gen: 4, amount: 23 },
+                { id: 'up5', gen: 5, amount: 21 }, { id: 'up6', gen: 6, amount: 19 },
+                { id: 'up7', gen: 7, amount: 17 }, { id: 'up8', gen: 8, amount: 15 },
+                { id: 'up9', gen: 9, amount: 12 }, { id: 'up10', gen: 10, amount: 10 }
+            ],
+            company: 2800
+        }
+    },
+    {
+        id: 'S12', name: 'S12: 200 REN — Full 10-Gen ISP Chain',
+        desc: 'Same chain, 200 REN (3% pool); all generations receive higher ISP rates',
+        keyTest: 'Total ISP = RM300 (3%); company = RM2,700',
+        commission: 10000, renCount: 200, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const agents = [];
+            for (let i = 10; i >= 1; i--) {
+                const parentId = i < 10 ? `up${i+1}` : null;
+                agents.push(new Agent(`up${i}`, `Sapphire Gen${i}`, 'SAPPHIRE', parentId, true));
+            }
+            agents.push(new Agent('seller', 'Sapphire Seller', 'SAPPHIRE', 'up1', true));
+            return { agents, sellerId: 'seller' };
+        },
+        expected: {
+            personal: 7000,
+            overrides: {},
+            ispPaid: 300,
+            ispDetail: [
+                { id: 'up1', gen: 1, amount: 50 }, { id: 'up2', gen: 2, amount: 48 },
+                { id: 'up3', gen: 3, amount: 44 }, { id: 'up4', gen: 4, amount: 39 },
+                { id: 'up5', gen: 5, amount: 33 }, { id: 'up6', gen: 6, amount: 27 },
+                { id: 'up7', gen: 7, amount: 21 }, { id: 'up8', gen: 8, amount: 15 },
+                { id: 'up9', gen: 9, amount: 13 }, { id: 'up10', gen: 10, amount: 10 }
+            ],
+            company: 2700
+        }
+    },
+    {
+        id: 'S13', name: 'S13: 400 REN — Full 10-Gen ISP Chain (Max Pool)',
+        desc: 'Same chain, 400 REN (5% pool); maximum ISP rates',
+        keyTest: 'Total ISP = RM500 (5%); company = RM2,500',
+        commission: 10000, renCount: 400, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const agents = [];
+            for (let i = 10; i >= 1; i--) {
+                const parentId = i < 10 ? `up${i+1}` : null;
+                agents.push(new Agent(`up${i}`, `Sapphire Gen${i}`, 'SAPPHIRE', parentId, true));
+            }
+            agents.push(new Agent('seller', 'Sapphire Seller', 'SAPPHIRE', 'up1', true));
+            return { agents, sellerId: 'seller' };
+        },
+        expected: {
+            personal: 7000,
+            overrides: {},
+            ispPaid: 500,
+            ispDetail: [
+                { id: 'up1', gen: 1, amount: 100 }, { id: 'up2', gen: 2, amount: 90 },
+                { id: 'up3', gen: 3, amount: 80 },  { id: 'up4', gen: 4, amount: 65 },
+                { id: 'up5', gen: 5, amount: 50 },  { id: 'up6', gen: 6, amount: 35 },
+                { id: 'up7', gen: 7, amount: 25 },  { id: 'up8', gen: 8, amount: 20 },
+                { id: 'up9', gen: 9, amount: 20 },  { id: 'up10', gen: 10, amount: 15 }
+            ],
+            company: 2500
+        }
+    }
+    ]
+},
+
+// ─────────────────────────────────────────────────────────────────────
+// GROUP C: Combined Override + ISP
+// ─────────────────────────────────────────────────────────────────────
+{
+    id: 'C',
+    title: 'Group C: Combined Override + ISP',
+    scenarios: [
+    {
+        id: 'S14', name: 'S14: Sapphire → BD, 100 REN (Override + Partial ISP)',
+        desc: 'BD receives override AND Gen1 ISP; Gen2–10 ISP absorbed',
+        keyTest: 'BD gets RM1,700 override + RM30 ISP; company = RM1,270',
+        commission: 10000, renCount: 100, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const bd = new Agent('bd', 'BD Upline', 'BD', null, true);
+            const s  = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'bd', true);
+            return { agents: [bd, s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: { bd: 1700 }, ispPaid: 30, ispDetail: [{ id: 'bd', gen: 1, amount: 30 }], company: 1270 }
+    },
+    {
+        id: 'S15', name: 'S15: Full 4-Rank Chain, 100 REN (Override + ISP)',
+        desc: 'Sapphire → Ruby → BD → BD Unlocked; Gen4–10 ISP absorbed',
+        keyTest: 'Overrides RM2,000 + ISP RM83 paid; company = RM917',
+        commission: 10000, renCount: 100, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const bdu  = new Agent('bdu', 'BD Unlocked', 'BD_UNLOCKED', null, true);
+            const bd   = new Agent('bd', 'BD Agent', 'BD', 'bdu', true);
+            const ruby = new Agent('ruby', 'Ruby Agent', 'RUBY', 'bd', true);
+            const s    = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'ruby', true);
+            return { agents: [bdu, bd, ruby, s], sellerId: 'seller' };
+        },
+        expected: {
+            personal: 7000,
+            overrides: { ruby: 1000, bd: 700, bdu: 300 },
+            ispPaid: 83,
+            ispDetail: [
+                { id: 'ruby', gen: 1, amount: 30 },
+                { id: 'bd',   gen: 2, amount: 28 },
+                { id: 'bdu',  gen: 3, amount: 25 }
+            ],
+            company: 917
+        }
+    },
+    {
+        id: 'S16', name: 'S16: Full 4-Rank Chain, 400 REN (0% Subsidy, Max ISP)',
+        desc: 'Same chain at 400 REN; BD Unlocked gets no subsidy, max ISP pool',
+        keyTest: 'BD Unlocked override = RM0 at 400 REN; ISP 3 gens paid = RM270',
+        commission: 10000, renCount: 400, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const bdu  = new Agent('bdu', 'BD Unlocked', 'BD_UNLOCKED', null, true);
+            const bd   = new Agent('bd', 'BD Agent', 'BD', 'bdu', true);
+            const ruby = new Agent('ruby', 'Ruby Agent', 'RUBY', 'bd', true);
+            const s    = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'ruby', true);
+            return { agents: [bdu, bd, ruby, s], sellerId: 'seller' };
+        },
+        expected: {
+            personal: 7000,
+            overrides: { ruby: 1000, bd: 700, bdu: 0 },
+            ispPaid: 270,
+            ispDetail: [
+                { id: 'ruby', gen: 1, amount: 100 },
+                { id: 'bd',   gen: 2, amount: 90 },
+                { id: 'bdu',  gen: 3, amount: 80 }
+            ],
+            company: 1030
+        }
+    },
+    {
+        id: 'S17', name: 'S17: Sapphire → BD Unlocked (No BD in Chain), 100 REN',
+        desc: 'BD Unlocked receives full BD gap (17%) + subsidy (3%) in one hit',
+        keyTest: 'BD Unlocked override = RM1,700 BD portion + RM300 subsidy = RM2,000',
+        commission: 10000, renCount: 100, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const bdu = new Agent('bdu', 'BD Unlocked', 'BD_UNLOCKED', null, true);
+            const s   = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'bdu', true);
+            return { agents: [bdu, s], sellerId: 'seller' };
+        },
+        expected: {
+            personal: 7000,
+            overrides: { bdu: { bd: 1700, subsidy: 300, total: 2000 } },
+            ispPaid: 30,
+            ispDetail: [{ id: 'bdu', gen: 1, amount: 30 }],
+            company: 970
+        }
+    }
+    ]
+},
+
+// ─────────────────────────────────────────────────────────────────────
+// GROUP D: Termination / Inactive Agent
+// ─────────────────────────────────────────────────────────────────────
+{
+    id: 'D',
+    title: 'Group D: Termination / Inactive Agent (ISP Re-indexing)',
+    scenarios: [
+    {
+        id: 'S18', name: 'S18: Inactive Gen1 Sapphire → BD Re-indexed to Gen1',
+        desc: 'Sapphire(INACTIVE) is skipped; BD compresses to Gen1 for both override and ISP',
+        keyTest: 'BD receives Gen1 ISP rate (0.30%) because inactive agent is re-indexed out',
+        commission: 10000, renCount: 100, forcedSubsidyRate: null,
+        buildAgents: () => {
+            const bd   = new Agent('bd', 'BD Upline', 'BD', null, true);
+            const inac = new Agent('inac', 'Sapphire (Inactive)', 'SAPPHIRE', 'bd', false);
+            const s    = new Agent('seller', 'Sapphire Seller', 'SAPPHIRE', 'inac', true);
+            return { agents: [bd, inac, s], sellerId: 'seller' };
+        },
+        expected: { personal: 7000, overrides: { inac: 0, bd: 1700 }, ispPaid: 30, ispDetail: [{ id: 'bd', gen: 1, amount: 30 }], company: 1270 }
+    }
+    ]
+},
+
+// ─────────────────────────────────────────────────────────────────────
+// GROUP E: Project Commission
+// ─────────────────────────────────────────────────────────────────────
+{
+    id: 'E',
+    title: 'Group E: Project Commission (75% Personal / 10% PL / 10% PIC / 5% Company)',
+    scenarios: [
+    {
+        id: 'S19', name: 'S19: Simple Project — 1 Seller, 1 PL, 1 PIC',
+        desc: 'Sapphire seller, no uplines, 50 REN. Baseline project allocation.',
+        keyTest: '75/10/10/5 flat split; no override or ISP on personal pool',
+        allocation: 10000, renCount: 50, projectCommission: true,
+        buildAgents: () => {
+            const s = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', null, true);
+            return {
+                agents: [s],
+                sellers: [{ id: 'seller', poolShare: 1.0 }],
+                pl:  [{ name: 'PL Alice',   share: 1.0 }],
+                pic: [{ name: 'PIC Bob',    share: 1.0 }]
+            };
+        },
+        expected: {
+            sellers: [{ id: 'seller', grossComm: 7500, personal: 5250, overrides: {}, ispPaid: 0, companyFromPool: 2250 }],
+            pl:  [{ name: 'PL Alice', amount: 1000 }],
+            pic: [{ name: 'PIC Bob',  amount: 1000 }],
+            companyBase: 500, totalCompany: 2750
+        }
+    },
+    {
+        id: 'S20', name: 'S20: Project + Override + ISP — 1 Seller, 1 PL, 1 PIC (100 REN)',
+        desc: 'Sapphire sells, Ruby is direct upline, 100 REN. Override/ISP apply on 75% pool only.',
+        keyTest: 'Override (10%) and ISP (0.30%) apply only on the 75% personal pool — PL/PIC/company base are untouched flat amounts',
+        allocation: 10000, renCount: 100, projectCommission: true,
+        buildAgents: () => {
+            const ruby = new Agent('ruby', 'Ruby Upline', 'RUBY', null, true);
+            const s    = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', 'ruby', true);
+            return {
+                agents: [ruby, s],
+                sellers: [{ id: 'seller', poolShare: 1.0 }],
+                pl:  [{ name: 'PL Alice', share: 1.0 }],
+                pic: [{ name: 'PIC Bob',  share: 1.0 }]
+            };
+        },
+        expected: {
+            sellers: [{ id: 'seller', grossComm: 7500, personal: 5250, overrides: { ruby: 750 }, ispPaid: 22.50, ispDetail: [{ id: 'ruby', gen: 1, amount: 22.50 }], companyFromPool: 1477.50 }],
+            pl:  [{ name: 'PL Alice', amount: 1000 }],
+            pic: [{ name: 'PIC Bob',  amount: 1000 }],
+            companyBase: 500, totalCompany: 1977.50
+        }
+    },
+    {
+        id: 'S21', name: 'S21: Project — 1 Seller, 1 PL, 2 PICs (5% each)',
+        desc: '2 PICs split the 10% PIC pool equally. Seller pool and override/ISP unchanged.',
+        keyTest: '2 PICs each receive 5% (RM500); company total unchanged vs S19',
+        allocation: 10000, renCount: 50, projectCommission: true,
+        buildAgents: () => {
+            const s = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', null, true);
+            return {
+                agents: [s],
+                sellers: [{ id: 'seller', poolShare: 1.0 }],
+                pl:  [{ name: 'PL Alice',    share: 1.0 }],
+                pic: [{ name: 'PIC Bob',     share: 0.5 },
+                      { name: 'PIC Charlie', share: 0.5 }]
+            };
+        },
+        expected: {
+            sellers: [{ id: 'seller', grossComm: 7500, personal: 5250, overrides: {}, ispPaid: 0, companyFromPool: 2250 }],
+            pl:  [{ name: 'PL Alice',    amount: 1000 }],
+            pic: [{ name: 'PIC Bob',     amount: 500  },
+                  { name: 'PIC Charlie', amount: 500  }],
+            companyBase: 500, totalCompany: 2750
+        }
+    },
+    {
+        id: 'S22', name: 'S22: Project — 1 Seller, 2 PLs (5% each), 1 PIC',
+        desc: '2 PLs split the 10% PL pool equally.',
+        keyTest: '2 PLs each receive 5% (RM500); PIC still gets full 10%',
+        allocation: 10000, renCount: 50, projectCommission: true,
+        buildAgents: () => {
+            const s = new Agent('seller', 'Sapphire Agent', 'SAPPHIRE', null, true);
+            return {
+                agents: [s],
+                sellers: [{ id: 'seller', poolShare: 1.0 }],
+                pl:  [{ name: 'PL Alice', share: 0.5 },
+                      { name: 'PL Bob',   share: 0.5 }],
+                pic: [{ name: 'PIC Carol', share: 1.0 }]
+            };
+        },
+        expected: {
+            sellers: [{ id: 'seller', grossComm: 7500, personal: 5250, overrides: {}, ispPaid: 0, companyFromPool: 2250 }],
+            pl:  [{ name: 'PL Alice', amount: 500  },
+                  { name: 'PL Bob',   amount: 500  }],
+            pic: [{ name: 'PIC Carol', amount: 1000 }],
+            companyBase: 500, totalCompany: 2750
+        }
+    },
+    {
+        id: 'S23', name: 'S23: Project — 2 Sellers (60/40 Pool Split), 1 PL, 1 PIC',
+        desc: 'Sapphire (60%) and Ruby (40%) share the 75% pool. No uplines, 50 REN.',
+        keyTest: 'Each seller gets their rank% applied to their share of the pool; company gets both remainders',
+        allocation: 10000, renCount: 50, projectCommission: true,
+        buildAgents: () => {
+            const a = new Agent('sellerA', 'Sapphire Agent', 'SAPPHIRE', null, true);
+            const b = new Agent('sellerB', 'Ruby Agent',    'RUBY',     null, true);
+            return {
+                agents: [a, b],
+                sellers: [{ id: 'sellerA', poolShare: 0.6 },
+                           { id: 'sellerB', poolShare: 0.4 }],
+                pl:  [{ name: 'PL Alice', share: 1.0 }],
+                pic: [{ name: 'PIC Bob',  share: 1.0 }]
+            };
+        },
+        expected: {
+            sellers: [
+                { id: 'sellerA', grossComm: 4500, personal: 3150, overrides: {}, ispPaid: 0, companyFromPool: 1350 },
+                { id: 'sellerB', grossComm: 3000, personal: 2400, overrides: {}, ispPaid: 0, companyFromPool: 600  }
+            ],
+            pl:  [{ name: 'PL Alice', amount: 1000 }],
+            pic: [{ name: 'PIC Bob',  amount: 1000 }],
+            companyBase: 500, totalCompany: 2450
+        }
+    },
+    {
+        id: 'S24', name: 'S24: Project — 2 Sellers, 2 PLs, 2 PICs, Override + ISP (100 REN)',
+        desc: 'Sapphire (60%, Ruby upline) + Ruby (40%, no uplines); 2 PLs (5% each), 2 PICs (5% each), 100 REN.',
+        keyTest: 'Override/ISP on each seller\'s pool share independently; PL/PIC split equally; all pools sum to allocation',
+        allocation: 10000, renCount: 100, projectCommission: true,
+        buildAgents: () => {
+            const ruby  = new Agent('ruby',    'Ruby Upline',   'RUBY',    null,   true);
+            const a     = new Agent('sellerA', 'Sapphire Agent','SAPPHIRE','ruby', true);
+            const b     = new Agent('sellerB', 'Ruby Agent',    'RUBY',    null,   true);
+            return {
+                agents: [ruby, a, b],
+                sellers: [{ id: 'sellerA', poolShare: 0.6 },
+                           { id: 'sellerB', poolShare: 0.4 }],
+                pl:  [{ name: 'PL Alice', share: 0.5 },
+                      { name: 'PL Bob',   share: 0.5 }],
+                pic: [{ name: 'PIC Carol', share: 0.5 },
+                      { name: 'PIC Dave',  share: 0.5 }]
+            };
+        },
+        expected: {
+            sellers: [
+                // sellerA: gross=4500, personal=70%×4500=3150, override ruby=10%×4500=450, ISP Gen1=0.30%×4500=13.50, co=886.50
+                { id: 'sellerA', grossComm: 4500, personal: 3150, overrides: { ruby: 450 }, ispPaid: 13.50, ispDetail: [{ id: 'ruby', gen: 1, amount: 13.50 }], companyFromPool: 886.50 },
+                // sellerB: gross=3000, personal=80%×3000=2400, no uplines → ISP all absorbed → co=600
+                { id: 'sellerB', grossComm: 3000, personal: 2400, overrides: {}, ispPaid: 0, companyFromPool: 600 }
+            ],
+            pl:  [{ name: 'PL Alice', amount: 500 },
+                  { name: 'PL Bob',   amount: 500 }],
+            pic: [{ name: 'PIC Carol', amount: 500 },
+                  { name: 'PIC Dave',  amount: 500 }],
+            companyBase: 500, totalCompany: 1986.50
+        }
+    }
+    ]
+}
+
+]; // end SCENARIO_GROUPS
+
+// =====================================================================
+//  RENDER ENGINE
+// =====================================================================
+
+function rankClass(rank) {
+    if (!rank) return '';
+    return rank.toLowerCase().replace('_', '_');
+}
+
+function rankLabel(rank, subsidyRate) {
+    switch (rank) {
+        case 'SAPPHIRE': return 'Sapphire (70%)';
+        case 'RUBY':     return 'Ruby (80%)';
+        case 'BD':       return 'BD (87%)';
+        case 'BD_UNLOCKED':
+            const effPct = (87 + subsidyRate * 100).toFixed(0);
+            return `BD Unlocked (${effPct}%)`;
+        default: return rank;
+    }
+}
+
+function renderChain(agents, sellerId, subsidyRate, scenario) {
+    const seller = agents.find(a => a.id === sellerId);
+    const chain  = buildUplineChain(agents, sellerId);
+
+    // Build ordered list: top uplines first, seller last
+    const ordered = [...chain].reverse(); // top of chain first
+    ordered.push(seller);
+
+    // For S11-S13 (10-gen chains) collapse middle
+    const MAX_SHOW = 5;
+    let showNodes = ordered;
+    let collapsed = false;
+    if (ordered.length > MAX_SHOW + 2) {
+        showNodes = [...ordered.slice(0, 3), null, ordered[ordered.length - 1]];
+        collapsed = true;
+    }
+
+    let html = '<div class="chain">';
+    showNodes.forEach((agent, idx) => {
+        if (agent === null) {
+            html += `<div class="chain-more">··· ${ordered.length - 4} more ···</div>`;
+            html += '<div class="chain-arrow">↓</div>';
+            return;
+        }
+        const isSeller = agent.id === sellerId;
+        const cls = rankClass(agent.rank) + (isSeller ? ' seller-ring' : '') + (!agent.active ? ' inactive' : '');
+        const effRate = agent.rank === 'BD_UNLOCKED' ? (0.87 + subsidyRate) : agent.getBaseRate();
+        html += `<div class="chain-node ${cls}">`;
+        html += `<div class="node-name">${agent.name}</div>`;
+        html += `<div class="node-rank">${agent.rank.replace('_', ' ')}</div>`;
+        html += `<div class="node-rate">${pct(effRate)}</div>`;
+        if (isSeller) html += `<div class="node-seller-label">SELLER</div>`;
+        if (!agent.active) html += `<div class="node-inactive-label">INACTIVE</div>`;
+        html += '</div>';
+        if (idx < showNodes.length - 1 && showNodes[idx + 1] !== null) {
+            html += '<div class="chain-arrow">↓</div>';
+        } else if (showNodes[idx + 1] === null) {
+            html += '<div class="chain-arrow">↓</div>';
+        }
+    });
+    html += '</div>';
+    return html;
+}
+
+function renderCalcTable(result, expected, scenario) {
+    let rows = '';
+    let allPass = true;
+
+    function addRow(label, expVal, actVal, cls = '', extraCls = '') {
+        const ok = near(actVal, expVal);
+        if (!ok) allPass = false;
+        return `<tr class="${extraCls}"><td>${label}</td><td>${rm(expVal)}</td><td>${tick(ok)}</td></tr>`;
+    }
+
+    // Personal
+    rows += addRow(`Personal (${pct(result.sellerEffRate)} × gross)`, expected.personal, result.personalCommission);
+
+    // Overrides
+    result.overrides.forEach(o => {
+        if (o.skipped) {
+            rows += `<tr class="skipped-row"><td>Override → ${o.upline.name} <em>(inactive, skipped)</em></td><td class="dim">—</td><td class="dim">–</td></tr>`;
+            return;
+        }
+        const expEntry = expected.overrides[o.upline.id];
+        if (expEntry === undefined) return;
+
+        if (o.upline.rank === 'BD_UNLOCKED' && typeof expEntry === 'object' && expEntry !== null && 'total' in expEntry) {
+            // Split row for BD_UNLOCKED
+            const okBD  = near(o.bdAmount, expEntry.bd);
+            const okSub = near(o.subsidyAmount, expEntry.subsidy);
+            const okTot = near(o.amount, expEntry.total);
+            if (!okBD || !okSub || !okTot) allPass = false;
+            rows += `<tr><td>Override → ${o.upline.name} <small>(BD gap portion)</small> (${pct(o.bdAmount / result.grossCommission)})</td><td>${rm(expEntry.bd)}</td><td>${tick(okBD)}</td></tr>`;
+            rows += `<tr><td>Override → ${o.upline.name} <small>(Subsidy portion)</small> (${pct(o.subsidyAmount / result.grossCommission)})</td><td>${rm(expEntry.subsidy)}</td><td>${tick(okSub)}</td></tr>`;
+            rows += `<tr class="subtotal-row"><td>&nbsp;&nbsp;BD Unlocked total (${pct(o.amount / result.grossCommission)} → ${rm(expEntry.total)})</td><td></td><td>${tick(okTot)}</td></tr>`;
+        } else {
+            const expAmt = typeof expEntry === 'number' ? expEntry : expEntry.total;
+            const ok = near(o.amount, expAmt);
+            if (!ok) allPass = false;
+            rows += `<tr><td>Override → ${o.upline.name} (${pct(o.amount / result.grossCommission)})</td><td>${rm(expAmt)}</td><td>${tick(ok)}</td></tr>`;
+        }
+    });
+
+    // ISP rows
+    if (result.ispPayments.length > 0) {
+        result.ispPayments.forEach(p => {
+            if (p.absorbed) {
+                rows += `<tr class="absorbed-row"><td>ISP Gen${p.gen} (${pct(p.rate)}) — absorbed by company</td><td class="dim">${rm(p.amount)}</td><td class="dim">–</td></tr>`;
+            } else {
+                // Check against ispDetail if provided
+                let expAmt = null;
+                if (expected.ispDetail) {
+                    const det = expected.ispDetail.find(d => d.gen === p.gen);
+                    if (det) expAmt = det.amount;
+                }
+                if (expAmt !== null) {
+                    const ok = near(p.amount, expAmt);
+                    if (!ok) allPass = false;
+                    rows += `<tr><td>ISP Gen${p.gen} → ${p.upline.name} (${pct(p.rate)})</td><td>${rm(expAmt)}</td><td>${tick(ok)}</td></tr>`;
+                } else {
+                    rows += `<tr><td>ISP Gen${p.gen} → ${p.upline.name} (${pct(p.rate)})</td><td>—</td><td class="dim">–</td></tr>`;
+                }
+            }
+        });
+        // ISP total paid
+        const okISP = near(result.totalISPPaid, expected.ispPaid);
+        if (!okISP) allPass = false;
+        rows += `<tr class="subtotal-row"><td><strong>Total ISP Paid (${pct(result.totalISPPaid / result.grossCommission)})</strong></td><td>${rm(expected.ispPaid)}</td><td>${tick(okISP)}</td></tr>`;
+    } else {
+        const okISP = near(0, expected.ispPaid);
+        if (!okISP) allPass = false;
+        rows += `<tr><td>ISP (0%) — not active at ${result.renCount} REN</td><td>${rm(expected.ispPaid)}</td><td>${tick(okISP)}</td></tr>`;
+    }
+
+    // Company
+    const okCo = near(result.companyAmount, expected.company);
+    if (!okCo) allPass = false;
+    rows += `<tr class="company-row"><td><strong>Company Retention (${pct(result.companyAmount / result.grossCommission)})</strong></td><td>${rm(expected.company)}</td><td>${tick(okCo)}</td></tr>`;
+
+    const html = `
+        <div class="calc-section">
+            <h3>Calculation Breakdown &nbsp;|&nbsp; Gross: ${rm(result.grossCommission)} &nbsp;|&nbsp; REN Count: ${result.renCount}</h3>
+            <table class="calc-table">
+                <thead><tr><th>Item</th><th>Expected</th><th>✓</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>`;
+    return { html, allPass };
+}
+
+function renderProjectScenario(scenario) {
+    const alloc       = scenario.allocation;
+    const renCount    = scenario.renCount;
+    const { agents, sellers, pl, pic } = scenario.buildAgents();
+    const personalPool = 0.75 * alloc;
+    const plPool       = 0.10 * alloc;
+    const picPool      = 0.10 * alloc;
+    const companyBase  = 0.05 * alloc;
+    let allPass = true;
+
+    // Compute per-seller results
+    const sellerResults = sellers.map(s => ({
+        meta: s,
+        result: calculateCommission(agents, s.id, s.poolShare * personalPool, renCount, scenario.forcedSubsidyRate || null)
+    }));
+
+    // ── TABLE 1: Project Allocation ──────────────────────────────────
+    let t1rows = '';
+    // Seller pool
+    t1rows += `<tr><td><strong>Seller Personal Pool</strong></td><td>75%</td><td>${rm(personalPool)}</td></tr>`;
+    if (sellers.length > 1) {
+        sellers.forEach((s, i) => {
+            const agent = agents.find(a => a.id === s.id);
+            t1rows += `<tr class="subtotal-row"><td>&nbsp;&nbsp;${agent.name} (${(s.poolShare * 100).toFixed(0)}% of pool)</td><td>${pct(s.poolShare * 0.75)}</td><td>${rm(s.poolShare * personalPool)}</td></tr>`;
+        });
+    }
+    // PL rows
+    pl.forEach(p => {
+        const amt = p.share * plPool;
+        const label = pl.length > 1 ? `Project Leader — ${p.name} (${pct(p.share)} of PL pool)` : `Project Leader — ${p.name}`;
+        t1rows += `<tr><td>${label}</td><td>${pct(p.share * 0.10)}</td><td>${rm(amt)}</td></tr>`;
+    });
+    // PIC rows
+    pic.forEach(p => {
+        const amt = p.share * picPool;
+        const label = pic.length > 1 ? `Project IC — ${p.name} (${pct(p.share)} of PIC pool)` : `Project IC — ${p.name}`;
+        t1rows += `<tr><td>${label}</td><td>${pct(p.share * 0.10)}</td><td>${rm(amt)}</td></tr>`;
+    });
+    // Company base
+    t1rows += `<tr class="company-row"><td><strong>Company Base</strong></td><td>5%</td><td>${rm(companyBase)}</td></tr>`;
+
+    const t1html = `
+        <div class="calc-section" style="margin-bottom:12px;">
+            <h3>Table 1 — Project Allocation &nbsp;|&nbsp; Total: ${rm(alloc)} &nbsp;|&nbsp; REN: ${renCount}</h3>
+            <table class="calc-table">
+                <thead><tr><th>Role</th><th>%</th><th>Amount</th></tr></thead>
+                <tbody>${t1rows}</tbody>
+            </table>
+        </div>`;
+
+    // ── TABLE 2+: Per-seller breakdown ───────────────────────────────
+    let sellerTablesHtml = '';
+    sellerResults.forEach(({ meta, result }, idx) => {
+        const exp   = scenario.expected.sellers[idx];
+        const agent = agents.find(a => a.id === meta.id);
+        let rows = '';
+
+        // Gross comm header row
+        rows += `<tr class="subtotal-row"><td><strong>Gross Commission (${pct(meta.poolShare * 0.75)} of allocation)</strong></td><td>${rm(result.grossCommission)}</td><td>–</td></tr>`;
+
+        // Personal
+        const okP = near(result.personalCommission, exp.personal);
+        if (!okP) allPass = false;
+        rows += `<tr><td>Personal (${pct(result.sellerEffRate)})</td><td>${rm(exp.personal)}</td><td>${tick(okP)}</td></tr>`;
+
+        // Overrides
+        result.overrides.forEach(o => {
+            if (o.skipped) {
+                rows += `<tr class="skipped-row"><td>Override → ${o.upline.name} (inactive, skipped)</td><td>—</td><td>–</td></tr>`;
+                return;
+            }
+            const expEntry = exp.overrides[o.upline.id];
+            if (expEntry === undefined) return;
+            if (o.upline.rank === 'BD_UNLOCKED' && typeof expEntry === 'object' && 'total' in expEntry) {
+                const okBD  = near(o.bdAmount, expEntry.bd);
+                const okSub = near(o.subsidyAmount, expEntry.subsidy);
+                const okTot = near(o.amount, expEntry.total);
+                if (!okBD || !okSub || !okTot) allPass = false;
+                rows += `<tr><td>Override → ${o.upline.name} (BD gap ${pct(o.bdAmount / result.grossCommission)})</td><td>${rm(expEntry.bd)}</td><td>${tick(okBD)}</td></tr>`;
+                rows += `<tr><td>Override → ${o.upline.name} (Subsidy ${pct(o.subsidyAmount / result.grossCommission)})</td><td>${rm(expEntry.subsidy)}</td><td>${tick(okSub)}</td></tr>`;
+                rows += `<tr class="subtotal-row"><td>&nbsp;&nbsp;BD Unlocked total (${pct(o.amount / result.grossCommission)} → ${rm(expEntry.total)})</td><td></td><td>${tick(okTot)}</td></tr>`;
+            } else {
+                const expAmt = typeof expEntry === 'number' ? expEntry : expEntry.total;
+                const ok = near(o.amount, expAmt);
+                if (!ok) allPass = false;
+                rows += `<tr><td>Override → ${o.upline.name} (${pct(o.amount / result.grossCommission)})</td><td>${rm(expAmt)}</td><td>${tick(ok)}</td></tr>`;
+            }
+        });
+
+        // ISP
+        if (result.ispPayments.length > 0) {
+            result.ispPayments.forEach(p => {
+                if (p.absorbed) {
+                    rows += `<tr class="absorbed-row"><td>ISP Gen${p.gen} (${pct(p.rate)}) — absorbed by company</td><td class="dim">${rm(p.amount)}</td><td class="dim">–</td></tr>`;
+                } else {
+                    let expAmt = null;
+                    if (exp.ispDetail) {
+                        const det = exp.ispDetail.find(d => d.gen === p.gen);
+                        if (det) expAmt = det.amount;
+                    }
+                    if (expAmt !== null) {
+                        const ok = near(p.amount, expAmt);
+                        if (!ok) allPass = false;
+                        rows += `<tr><td>ISP Gen${p.gen} → ${p.upline.name} (${pct(p.rate)})</td><td>${rm(expAmt)}</td><td>${tick(ok)}</td></tr>`;
+                    } else {
+                        rows += `<tr><td>ISP Gen${p.gen} → ${p.upline.name} (${pct(p.rate)})</td><td>—</td><td class="dim">–</td></tr>`;
+                    }
+                }
+            });
+            const okISP = near(result.totalISPPaid, exp.ispPaid);
+            if (!okISP) allPass = false;
+            rows += `<tr class="subtotal-row"><td><strong>Total ISP Paid (${pct(result.totalISPPaid / result.grossCommission)})</strong></td><td>${rm(exp.ispPaid)}</td><td>${tick(okISP)}</td></tr>`;
+        } else {
+            const okISP = near(0, exp.ispPaid);
+            if (!okISP) allPass = false;
+            rows += `<tr><td>ISP (0%) — not active at ${renCount} REN</td><td>${rm(exp.ispPaid)}</td><td>${tick(okISP)}</td></tr>`;
+        }
+
+        // Company from pool
+        const okCo = near(result.companyAmount, exp.companyFromPool);
+        if (!okCo) allPass = false;
+        rows += `<tr class="company-row"><td><strong>Company from Pool (${pct(result.companyAmount / result.grossCommission)})</strong></td><td>${rm(exp.companyFromPool)}</td><td>${tick(okCo)}</td></tr>`;
+
+        sellerTablesHtml += `
+            <div class="calc-section" style="margin-bottom:12px;">
+                <h3>Table ${idx + 2} — ${agent.name} Commission Breakdown &nbsp;|&nbsp; Gross: ${rm(result.grossCommission)}</h3>
+                <table class="calc-table">
+                    <thead><tr><th>Item</th><th>Expected</th><th>✓</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    });
+
+    // ── Total Company summary row ─────────────────────────────────────
+    const actualTotalCompany = sellerResults.reduce((s, { result }) => s + result.companyAmount, 0) + companyBase;
+    const okTotCo = near(actualTotalCompany, scenario.expected.totalCompany);
+    if (!okTotCo) allPass = false;
+    const totalCoHtml = `
+        <div class="calc-section">
+            <table class="calc-table">
+                <tbody>
+                    <tr class="company-row"><td><strong>Total Company Retention (${pct(actualTotalCompany / alloc)})</strong></td><td>${rm(scenario.expected.totalCompany)}</td><td>${tick(okTotCo)}</td></tr>
+                </tbody>
+            </table>
+        </div>`;
+
+    return { html: t1html + sellerTablesHtml + totalCoHtml, allPass };
+}
+
+// =====================================================================
+//  MAIN RENDER
+// =====================================================================
+function renderAll() {
+    let totalCount = 0, passCount = 0, failCount = 0;
+    let scenariosHtml = '';
+
+    SCENARIO_GROUPS.forEach(group => {
+        scenariosHtml += `<div class="group-header">Group ${group.id}: ${group.title.replace(/^Group [A-E]: /, '')}</div>`;
+        if (group.note) {
+            scenariosHtml += `<div class="group-note">${group.note}</div>`;
+        }
+
+        group.scenarios.forEach(scenario => {
+            totalCount++;
+            let allPass, calcHtml, bodyHtml;
+
+            if (scenario.projectCommission) {
+                const calcResult = renderProjectScenario(scenario);
+                calcHtml = calcResult.html;
+                allPass  = calcResult.allPass;
+                const { agents, sellers } = scenario.buildAgents();
+                const subsidyRate = getSubsidyRate(scenario.renCount);
+                let chainHtml = '';
+                if (sellers.length > 1) {
+                    chainHtml = '<div class="chain-multi">';
+                    sellers.forEach(s => {
+                        const agent = agents.find(a => a.id === s.id);
+                        chainHtml += `<div class="chain-seller-col">
+                            <div class="chain-seller-label">${agent.name}<br>(${(s.poolShare * 100).toFixed(0)}% of pool)</div>
+                            ${renderChain(agents, s.id, subsidyRate, scenario)}
+                        </div>`;
+                    });
+                    chainHtml += '</div>';
+                } else {
+                    chainHtml = renderChain(agents, sellers[0].id, subsidyRate, scenario);
+                }
+                const chainWidth = sellers.length > 1 ? 'flex: 0 0 380px' : '';
+                bodyHtml = `<div class="side-by-side"><div class="chain-column" style="${chainWidth}">${chainHtml}</div><div class="calc-column">${calcHtml}</div></div>`;
+            } else {
+                const { agents, sellerId } = scenario.buildAgents();
+                const result = calculateCommission(agents, sellerId, scenario.commission, scenario.renCount, scenario.forcedSubsidyRate);
+                const calcResult = renderCalcTable(result, scenario.expected, scenario);
+                calcHtml = calcResult.html;
+                allPass  = calcResult.allPass;
+                const chainHtml = renderChain(agents, sellerId, result.subsidyRate, scenario);
+                bodyHtml = `<div class="side-by-side"><div class="chain-column">${chainHtml}</div><div class="calc-column">${calcHtml}</div></div>`;
+            }
+
+            if (allPass) passCount++; else failCount++;
+            const statusCls = allPass ? 'passed' : 'failed';
+
+            scenariosHtml += `
+                <div class="test-scenario ${statusCls}">
+                    <div class="scenario-header">
+                        <div class="scenario-title-block">
+                            <div class="scenario-title">${scenario.name}</div>
+                            <div class="scenario-desc">${scenario.desc}</div>
+                        </div>
+                        <div class="status-badge ${statusCls}">${allPass ? '✓ PASS' : '✗ FAIL'}</div>
+                    </div>
+                    ${bodyHtml}
+                    <div class="key-test"><strong>Key Test:</strong> ${scenario.keyTest}</div>
+                </div>`;
+        });
+    });
+
+    // Summary
+    document.getElementById('scenarios').innerHTML = scenariosHtml;
+}
+
+renderAll();
+</script>
+</body>
+</html>
